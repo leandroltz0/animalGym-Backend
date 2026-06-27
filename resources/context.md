@@ -1,78 +1,138 @@
-# MÍTICO ANIMAL GYM — Contexto Técnico del Proyecto
+# MÍTICO ANIMAL GYM — Backend Context & Architecture
 
-> Documento centralizado de arquitectura, stacks y funcionalidades planeadas.
-> Última actualización: Junio 2026
-
----
-
-## 🏗️ Visión General
-
-**Mítico Animal Gym** es un gimnasio ubicado en Paso del Rey, Buenos Aires. El proyecto digital busca ofrecer una experiencia premium para los miembros y visitantes, con una plataforma que evoluciona desde una landing page informativa hacia un ecosistema completo de gestión deportiva y e-commerce.
-
-El objetivo es construir un producto escalable que permita al dueño gestionar contenidos, productos y operaciones de forma autónoma, sin depender de desarrollo constante.
+> **Last Updated:** Junio 2026
+> **Purpose:** Single source of truth for AI agents and developers implementing the backend.
 
 ---
 
-## 🎯 Funcionalidades del Backend
+## 🏗️ Overview
+**Mítico Animal Gym** is a premium gym in Paso del Rey, Buenos Aires. We are building a scalable web platform.
+**Current Scope:** Backend API for managing Products (Store) and Admin Authentication.
+**Future Scope:** Memberships, Payments, Classes, Users (Not in this phase).
 
-### Fase 1: Autenticación + Gestión de Productos (Activa)
+---
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Auth & JWT** | Login seguro con email + contraseña, generación y validación de tokens JWT, roles (ADMIN, STAFF) |
-| **CRUD Productos** | Alta, baja, modificación y consulta de productos de la tienda (remeras, suplementos, accesorios) |
-| **Categorías** | Gestión de categorías de productos (Remeras, Whey, Creatina, etc.) con estado "Próximamente" |
-| **Upload de Imágenes** | Subida y servicio de imágenes de productos al filesystem del servidor |
-| **Frontend Público** | API REST para que el sitio público consuma productos dinámicamente |
-| **Panel Admin** | Endpoints protegidos con JWT para el panel de administración del frontend |
+## 🛠️ Tech Stack
+-   **Language:** Java 17
+-   **Framework:** Spring Boot 3.3.x
+-   **Database:** PostgreSQL (Hosted on Railway)
+-   **Security:** Spring Security + JWT (Stateless, 24h expiration)
+-   **Image Storage:** Cloudinary (API-based upload) — **NO local file storage**.
+-   **Build Tool:** Maven
+-   **Testing:** JUnit 5 + Mockito
 
-### Fase 2: Miembros y Membresías (Planificada)
+---
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Registro de Usuarios** | Creación de cuentas para miembros del gimnasio con datos personales |
-| **Perfiles de Miembro** | Gestión de datos: nombre, teléfono, fecha de nacimiento, plan activo |
-| **Planes/Membresías** | CRUD de planes (mensual, trimestral, anual) con precios y beneficios |
-| **Asignación de Planes** | Vincular miembros a planes activos con fecha de inicio y vencimiento |
-| **Control de Acceso** | Verificación de membresía activa para ingreso al gimnasio |
-| **Historial de Membresías** | Registro de planes anteriores y renovaciones |
+## 🚀 Hosting Strategy
+-   **Backend:** Render / Railway (Stateless, ephemeral filesystem).
+-   **Database:** Railway PostgreSQL (Persistent).
+-   **Images:** Cloudinary (External storage, URL-based).
+-   **Frontend:** Vercel / Netlify (React SPA).
 
-### Fase 3: Pagos y Facturación (Planificada)
+---
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Integración Mercado Pago** | Checkout para pagos de membresías y productos de la tienda |
-| **Webhooks MP** | Recepción de notificaciones de pago exitoso, pendiente o rechazado |
-| **Historial de Pagos** | Registro de transacciones con estado, monto, fecha y método |
-| **Facturación Automática** | Generación de comprobantes fiscales (integración AFIP si aplica) |
-| **Suscripciones Recurrentes** | Cobros automáticos mensuales/trimestrales para membresías |
-| **Deudas y Vencimientos** | Alertas de membresías por vencer y gestión de morosos |
-| **Reintegros** | Procesamiento de devoluciones y anulaciones de pagos |
+## 📊 Database Schema (Current Scope)
 
-### Fase 4: Gestión Operativa (Planificada)
+### 1. Table: `products`
+Stores store items. No complex relations yet.
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Clases y Horarios** | Gestión de clases grupales, horarios, cupos y profesores asignados |
-| **Reservas** | Sistema de reserva de clases con límite de cupos y lista de espera |
-| **Asistencia** | Registro de entrada/salida de miembros (QR, código o biométrico) |
-| **Entrenadores** | Perfiles de entrenadores, especialidades, horarios y asignación de clases |
-| **Comunicados** | Envío de notificaciones push o email a miembros activos |
-| **Reportes** | Dashboard con métricas: ingresos, membresías activas, asistencia, ventas |
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Primary Key |
+| `name` | `VARCHAR(255)` | `NOT NULL` | Product name |
+| `price` | `DECIMAL(10,2)` | `NOT NULL` | Current price |
+| `stock` | `INT` | `DEFAULT 0` | Available quantity |
+| `description` | `TEXT` | | Detailed description |
+| `image_url` | `VARCHAR(500)` | `NOT NULL` | Full Cloudinary URL |
+| `active` | `BOOLEAN` | `DEFAULT TRUE` | Soft delete toggle |
 
-### Fase 5: E-commerce Avanzado (Planificada)
+### 2. Table: `users` (Auth)
+Stores admin credentials.
 
-| Módulo | Descripción |
-|--------|-------------|
-| **Carrito de Compras** | Sesión de carrito persistente, agregar/quitar productos, cantidades |
-| **Checkout Completo** | Flujo de compra con dirección de envío, método de pago y confirmación |
-| **Seguimiento de Pedidos** | Estado de pedidos: pendiente, preparado, enviado, entregado |
-| **Stock/Inventario** | Control de stock por producto, alertas de bajo stock |
-| **Cupones y Descuentos** | Códigos promocionales con reglas de aplicación |
-| **Favoritos/Wishlist** | Lista de productos favoritos por usuario |
-| **Reseñas de Productos** | Sistema de calificación y comentarios de compradores |
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | `BIGINT` | `PK`, `AUTO_INCREMENT` | Primary Key |
+| `email` | `VARCHAR(255)` | `UNIQUE`, `NOT NULL` | Login email |
+| `password_hash` | `VARCHAR(255)` | `NOT NULL` | BCrypt hash |
+| `role` | `VARCHAR(50)` | `DEFAULT 'ADMIN'` | Role enum (ADMIN, STAFF) |
 
-### Fase 6: Integraciones Externas (Futuro)
+---
 
-| Módulo | Descripción |
-|--------|-------------|
+## 🔌 API Specification
+
+### 1. Public Endpoints (No Auth Required)
+Used by the public gym website to display products.
+
+-   **`GET /api/products`**
+    -   **Response:** `List<ProductResponseDTO>` (Only active products).
+    -   **Format:** JSON Array of objects.
+
+### 2. Authentication
+-   **`POST /api/auth/login`**
+    -   **Request:** `{ "email": "string", "password": "string" }`
+    -   **Response:** `{ "token": "eyJ...", "role": "ADMIN", "email": "..." }`
+    -   **Logic:** Verify email, check BCrypt password, generate JWT.
+
+### 3. Admin Endpoints (JWT Protected)
+Used by the `/admin` dashboard. Requires `Authorization: Bearer <token>` header.
+
+-   **`POST /api/admin/products`**
+    -   **Format:** `multipart/form-data`
+    -   **Parts:** `file` (Image), `data` (JSON string of ProductRequestDTO).
+    -   **Logic:** Upload image to Cloudinary -> Get URL -> Save Product to DB with URL.
+    -   **Response:** `ProductResponseDTO` (Created).
+
+-   **`PATCH /api/admin/products/{id}`**
+    -   **Format:** `application/json` or `multipart/form-data` (optional image update).
+    -   **Logic:** Update fields. If new image provided, upload and replace URL.
+    -   **Response:** `ProductResponseDTO` (Updated).
+
+-   **`DELETE /api/admin/products/{id}`**
+    -   **Logic:** Soft delete (set `active = false`).
+    -   **Response:** `204 No Content`.
+
+---
+
+## 📐 Implementation Guidelines
+
+### Architecture Pattern
+Use a standard layered architecture:
+1.  **Controller:** Handles HTTP requests, validation, returns DTOs.
+2.  **Service:** Business logic, Cloudinary integration, transaction management.
+3.  **Repository:** Spring Data JPA interfaces.
+4.  **Entity:** JPA mapped classes (`@Entity`, `@Table`).
+5.  **DTO:** Separate objects for Request (`ProductRequestDTO`) and Response (`ProductResponseDTO`). Never expose Entities directly.
+
+### Security Best Practices
+-   **CORS:** Configure `WebSecurityConfig` to allow requests from Frontend origins (`http://localhost:5173`, production URL).
+-   **Validation:** Use `@Valid`, `@NotBlank`, `@Positive` on DTOs.
+-   **Error Handling:** Use `@RestControllerAdvice` to return clean JSON errors, not stack traces.
+
+### Image Handling (Cloudinary)
+-   **Do NOT save files locally.** The backend is stateless.
+-   Use `cloudinary` Maven dependency.
+-   Service receives `MultipartFile`, uploads to Cloudinary via API, and receives a secure URL.
+-   Save **only the URL string** in the PostgreSQL database.
+
+### Testing
+-   **Unit Tests:** Use **JUnit 5** and **Mockito**. Test Service logic and Security rules.
+-   **Integration Tests:** Use `@SpringBootTest` and `MockMvc` for Controller endpoints.
+-   **Coverage:** Focus on Auth flow (Login success/fail) and Product CRUD (Create with image).
+
+---
+
+## 🎨 Frontend Integration Notes
+-   **Framework:** React + Vite + TypeScript + TailwindCSS.
+-   **State Management:** Zustand (Auth), TanStack Query (Data Fetching).
+-   **Auth:** JWT stored in `localStorage`, sent in headers.
+-   **Product Cards:** Frontend iterates over the JSON array from `GET /api/products`.
+-   **Admin Dashboard:** Single file HTML/React component hosted at `/admin`.
+-   **Image Upload:** Frontend uses `FormData` to send `multipart/form-data` requests.
+
+---
+
+## ⏳ Future Scope (Not yet implemented)
+-   Memberships (Plans, Member profiles, Due dates).
+-   Payments (MercadoPago integration, Invoicing).
+-   Classes & Schedules (Reservations, Trainers).
+-   User Registration (Customer accounts).
