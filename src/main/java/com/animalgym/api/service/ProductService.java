@@ -1,6 +1,7 @@
 package com.animalgym.api.service;
 
 import com.animalgym.api.dto.request.ProductRequest;
+import com.animalgym.api.dto.request.ProductUpdateRequest;
 import com.animalgym.api.dto.response.ProductResponse;
 import com.animalgym.api.entity.Product;
 import com.animalgym.api.exception.ResourceNotFoundException;
@@ -58,13 +59,21 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse updateProduct(Long id, ProductRequest request, MultipartFile image) {
+    public ProductResponse updateProduct(Long id, ProductUpdateRequest request, MultipartFile image) {
         Product product = findProduct(id);
 
-        product.setName(request.getName());
-        product.setPrice(request.getPrice());
-        product.setStock(request.getStock() != null ? request.getStock() : 0);
-        product.setDescription(request.getDescription());
+        if (request.getName() != null) {
+            product.setName(request.getName());
+        }
+        if (request.getPrice() != null) {
+            product.setPrice(request.getPrice());
+        }
+        if (request.getStock() != null) {
+            product.setStock(request.getStock());
+        }
+        if (request.getDescription() != null) {
+            product.setDescription(request.getDescription());
+        }
 
         if (image != null && !image.isEmpty()) {
             String newImageUrl = cloudinaryService.uploadImage(image);
@@ -97,6 +106,7 @@ public class ProductService {
                 .stock(product.getStock())
                 .description(product.getDescription())
                 .imageUrl(product.getImageUrl())
+                .active(product.getActive())
                 .build();
     }
 }

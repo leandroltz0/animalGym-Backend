@@ -4,12 +4,14 @@ import com.animalgym.api.dto.request.LoginRequest;
 import com.animalgym.api.dto.response.LoginResponse;
 import com.animalgym.api.exception.UnauthorizedException;
 import com.animalgym.api.service.AuthService;
+import com.animalgym.api.service.JwtService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.Mockito.*;
@@ -17,6 +19,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
+@Import({com.animalgym.api.config.SecurityConfig.class, com.animalgym.api.config.JwtAuthFilter.class})
 class AuthControllerTest {
 
     @Autowired
@@ -25,8 +28,11 @@ class AuthControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockitoBean
+    @MockBean
     private AuthService authService;
+
+    @MockBean
+    private JwtService jwtService;
 
     @Test
     void shouldReturnTokenOnSuccessfulLogin() throws Exception {

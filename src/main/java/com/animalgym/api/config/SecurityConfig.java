@@ -1,8 +1,9 @@
 package com.animalgym.api.config;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -15,10 +16,21 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final String frontendUrlDev;
+    private final String frontendUrlProd;
+
+    public SecurityConfig(
+            JwtAuthFilter jwtAuthFilter,
+            @Value("${app.frontend.url.dev}") String frontendUrlDev,
+            @Value("${app.frontend.url.prod}") String frontendUrlProd
+    ) {
+        this.jwtAuthFilter = jwtAuthFilter;
+        this.frontendUrlDev = frontendUrlDev;
+        this.frontendUrlProd = frontendUrlProd;
+    }
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -38,6 +50,16 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").authenticated()
                         .anyRequest().permitAll()
                 )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.getWriter().write(
+                                    "{\"status\":401,\"message\":\"Unauthorized\",\"timestamp\":\"" +
+                                            java.time.LocalDateTime.now() + "\"}"
+                            );
+                        })
+                )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -46,10 +68,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                "http://localhost:5173",
-                "http://localhost:3000"
-        ));
+        config.setAllowedOrigins(List.of(frontendUrlDev, frontendUrlProd));
         config.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
