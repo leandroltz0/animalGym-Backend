@@ -1,6 +1,7 @@
 package com.animalgym.api.service;
 
 import com.animalgym.api.dto.request.ProductRequest;
+import com.animalgym.api.dto.request.ProductUpdateRequest;
 import com.animalgym.api.dto.response.ProductResponse;
 import com.animalgym.api.entity.Product;
 import com.animalgym.api.exception.ResourceNotFoundException;
@@ -106,7 +107,7 @@ class ProductServiceTest {
                 .id(1L).name("Old Name").price(new BigDecimal("10"))
                 .stock(5).description("Old desc").imageUrl("old-url").active(true).build();
 
-        ProductRequest request = new ProductRequest();
+        ProductUpdateRequest request = new ProductUpdateRequest();
         request.setName("New Name");
         request.setPrice(new BigDecimal("15"));
         request.setStock(10);
