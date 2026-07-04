@@ -87,6 +87,10 @@ public class ProductService {
             product.setCategory(request.getCategory());
         }
 
+        if (request.getActive() != null) {
+            product.setActive(request.getActive());
+        }
+
         Product saved = productRepository.save(product);
         return toResponse(saved);
     }

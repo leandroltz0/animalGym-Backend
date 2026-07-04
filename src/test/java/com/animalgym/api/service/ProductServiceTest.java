@@ -121,6 +121,23 @@ class ProductServiceTest {
     }
 
     @Test
+    void shouldToggleActiveViaUpdate() {
+        Product existing = Product.builder()
+                .id(1L).name("Test").price(new BigDecimal("10"))
+                .stock(5).description("Desc").imageUrl("url").category("General").active(true).build();
+
+        ProductUpdateRequest request = new ProductUpdateRequest();
+        request.setActive(false);
+
+        when(productRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
+
+        ProductResponse response = productService.updateProduct(1L, request, null);
+
+        assertFalse(response.getActive());
+    }
+
+    @Test
     void shouldReturnAllProductsForAdmin() {
         Product p1 = Product.builder().id(1L).name("P1").price(new BigDecimal("10"))
                 .stock(1).imageUrl("u1").category("General").active(true).build();
