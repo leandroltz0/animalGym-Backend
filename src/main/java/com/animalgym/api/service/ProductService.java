@@ -18,7 +18,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
-    private final CloudinaryService cloudinaryService;
+    private final ImageStorageService imageStorageService;
 
     public List<ProductResponse> getActiveProducts() {
         return productRepository.findByActiveTrue()
@@ -42,7 +42,7 @@ public class ProductService {
     @Transactional
     public ProductResponse createProduct(ProductRequest request, MultipartFile image) {
         String imageUrl = (image != null && !image.isEmpty())
-                ? cloudinaryService.uploadImage(image)
+                ? imageStorageService.uploadImage(image)
                 : (request.getImageUrl() != null ? request.getImageUrl() : "");
 
         Product product = Product.builder()
@@ -76,7 +76,7 @@ public class ProductService {
         }
 
         if (image != null && !image.isEmpty()) {
-            String newImageUrl = cloudinaryService.uploadImage(image);
+            String newImageUrl = imageStorageService.uploadImage(image);
             product.setImageUrl(newImageUrl);
         } else if (request.getImageUrl() != null) {
             product.setImageUrl(request.getImageUrl());
@@ -89,8 +89,7 @@ public class ProductService {
     @Transactional
     public void deleteProduct(Long id) {
         Product product = findProduct(id);
-        product.setActive(false);
-        productRepository.save(product);
+        productRepository.delete(product);
     }
 
     private Product findProduct(Long id) {

@@ -26,13 +26,13 @@ class ProductServiceTest {
     private ProductRepository productRepository;
 
     @Mock
-    private CloudinaryService cloudinaryService;
+    private ImageStorageService imageStorageService;
 
     private ProductService productService;
 
     @BeforeEach
     void setUp() {
-        productService = new ProductService(productRepository, cloudinaryService);
+        productService = new ProductService(productRepository, imageStorageService);
     }
 
     @Test
@@ -62,7 +62,7 @@ class ProductServiceTest {
 
         MultipartFile image = mock(MultipartFile.class);
         when(image.isEmpty()).thenReturn(false);
-        when(cloudinaryService.uploadImage(image)).thenReturn("https://cloudinary.com/bar.jpg");
+        when(imageStorageService.uploadImage(image)).thenReturn("https://cloudinary.com/bar.jpg");
 
         Product savedProduct = Product.builder()
                 .id(1L).name("Protein Bar").price(new BigDecimal("4.99"))
@@ -75,7 +75,7 @@ class ProductServiceTest {
 
         assertEquals("Protein Bar", response.getName());
         assertEquals("https://cloudinary.com/bar.jpg", response.getImageUrl());
-        verify(cloudinaryService).uploadImage(image);
+        verify(imageStorageService).uploadImage(image);
     }
 
     @Test
@@ -87,18 +87,16 @@ class ProductServiceTest {
     }
 
     @Test
-    void shouldSoftDeleteProduct() {
+    void shouldHardDeleteProduct() {
         Product product = Product.builder()
                 .id(1L).name("Test").price(new BigDecimal("10"))
                 .stock(5).description("Test").imageUrl("url").active(true).build();
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productRepository.save(any(Product.class))).thenAnswer(i -> i.getArgument(0));
 
         productService.deleteProduct(1L);
 
-        assertFalse(product.getActive());
-        verify(productRepository).save(product);
+        verify(productRepository).delete(product);
     }
 
     @Test

@@ -4,7 +4,6 @@ import com.animalgym.api.dto.request.ProductRequest;
 import com.animalgym.api.dto.request.ProductUpdateRequest;
 import com.animalgym.api.dto.response.ProductResponse;
 import com.animalgym.api.service.ProductService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
@@ -20,7 +19,6 @@ import java.util.List;
 public class AdminProductController {
 
     private final ProductService productService;
-    private final ObjectMapper objectMapper;
 
     @GetMapping
     public ResponseEntity<List<ProductResponse>> getAllProducts() {
@@ -34,10 +32,9 @@ public class AdminProductController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponse> createProduct(
-            @RequestPart("data") String dataJson,
+            @RequestPart("data") @Valid ProductRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file
-    ) throws IOException {
-        ProductRequest request = objectMapper.readValue(dataJson, ProductRequest.class);
+    ) {
         ProductResponse response = productService.createProduct(request, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -45,10 +42,12 @@ public class AdminProductController {
     @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ProductResponse> updateProductMultipart(
             @PathVariable Long id,
-            @RequestPart(value = "data", required = false) String dataJson,
+            @RequestPart(value = "data", required = false) @Valid ProductUpdateRequest request,
             @RequestPart(value = "file", required = false) MultipartFile file
-    ) throws IOException {
-        ProductUpdateRequest request = dataJson != null ? objectMapper.readValue(dataJson, ProductUpdateRequest.class) : new ProductUpdateRequest();
+    ) {
+        if (request == null) {
+            request = new ProductUpdateRequest();
+        }
         ProductResponse response = productService.updateProduct(id, request, file);
         return ResponseEntity.ok(response);
     }
