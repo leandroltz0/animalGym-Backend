@@ -39,10 +39,10 @@ class ProductServiceTest {
     void shouldReturnOnlyActiveProducts() {
         Product activeProduct = Product.builder()
                 .id(1L).name("Whey Protein").price(new BigDecimal("29.99"))
-                .stock(10).description("Desc").imageUrl("url1").active(true).build();
+                .stock(10).description("Desc").imageUrl("url1").category("Suplementos").active(true).build();
         Product inactiveProduct = Product.builder()
                 .id(2L).name("Creatine").price(new BigDecimal("19.99"))
-                .stock(5).description("Desc").imageUrl("url2").active(false).build();
+                .stock(5).description("Desc").imageUrl("url2").category("Suplementos").active(false).build();
 
         when(productRepository.findByActiveTrue()).thenReturn(List.of(activeProduct));
 
@@ -67,7 +67,7 @@ class ProductServiceTest {
         Product savedProduct = Product.builder()
                 .id(1L).name("Protein Bar").price(new BigDecimal("4.99"))
                 .stock(50).description("Delicious protein bar")
-                .imageUrl("https://cloudinary.com/bar.jpg").active(true).build();
+                .imageUrl("https://cloudinary.com/bar.jpg").category("Barras").active(true).build();
 
         when(productRepository.save(any(Product.class))).thenReturn(savedProduct);
 
@@ -90,7 +90,7 @@ class ProductServiceTest {
     void shouldHardDeleteProduct() {
         Product product = Product.builder()
                 .id(1L).name("Test").price(new BigDecimal("10"))
-                .stock(5).description("Test").imageUrl("url").active(true).build();
+                .stock(5).description("Test").imageUrl("url").category("General").active(true).build();
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
@@ -103,7 +103,7 @@ class ProductServiceTest {
     void shouldUpdateProduct() {
         Product existing = Product.builder()
                 .id(1L).name("Old Name").price(new BigDecimal("10"))
-                .stock(5).description("Old desc").imageUrl("old-url").active(true).build();
+                .stock(5).description("Old desc").imageUrl("old-url").category("General").active(true).build();
 
         ProductUpdateRequest request = new ProductUpdateRequest();
         request.setName("New Name");
@@ -123,9 +123,9 @@ class ProductServiceTest {
     @Test
     void shouldReturnAllProductsForAdmin() {
         Product p1 = Product.builder().id(1L).name("P1").price(new BigDecimal("10"))
-                .stock(1).imageUrl("u1").active(true).build();
+                .stock(1).imageUrl("u1").category("General").active(true).build();
         Product p2 = Product.builder().id(2L).name("P2").price(new BigDecimal("20"))
-                .stock(2).imageUrl("u2").active(false).build();
+                .stock(2).imageUrl("u2").category("General").active(false).build();
 
         when(productRepository.findAllByOrderByIdDesc()).thenReturn(List.of(p2, p1));
 

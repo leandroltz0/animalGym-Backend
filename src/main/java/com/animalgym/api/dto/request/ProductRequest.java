@@ -24,4 +24,7 @@ public class ProductRequest {
     private String description;
 
     private String imageUrl;
+
+    @NotBlank(message = "Category is required")
+    private String category;
 }

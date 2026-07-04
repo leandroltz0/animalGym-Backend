@@ -34,6 +34,10 @@ public class Product {
     @Column(name = "image_url", nullable = false, length = 500)
     private String imageUrl;
 
+    @Column(nullable = false, length = 100)
+    @Builder.Default
+    private String category = "General";
+
     @Column(nullable = false)
     @Builder.Default
     private Boolean active = true;

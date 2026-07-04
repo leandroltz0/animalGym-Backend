@@ -51,6 +51,7 @@ public class ProductService {
                 .stock(request.getStock() != null ? request.getStock() : 0)
                 .description(request.getDescription())
                 .imageUrl(imageUrl)
+                .category(request.getCategory() != null ? request.getCategory() : "General")
                 .active(true)
                 .build();
 
@@ -82,6 +83,10 @@ public class ProductService {
             product.setImageUrl(request.getImageUrl());
         }
 
+        if (request.getCategory() != null) {
+            product.setCategory(request.getCategory());
+        }
+
         Product saved = productRepository.save(product);
         return toResponse(saved);
     }
@@ -105,6 +110,7 @@ public class ProductService {
                 .stock(product.getStock())
                 .description(product.getDescription())
                 .imageUrl(product.getImageUrl())
+                .category(product.getCategory())
                 .active(product.getActive())
                 .build();
     }

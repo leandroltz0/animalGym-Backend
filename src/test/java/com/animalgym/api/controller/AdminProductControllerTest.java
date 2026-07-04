@@ -88,10 +88,11 @@ class AdminProductControllerTest {
         request.setName("New Product");
         request.setPrice(new BigDecimal("15.99"));
         request.setStock(10);
+        request.setCategory("General");
 
         ProductResponse response = ProductResponse.builder()
                 .id(1L).name("New Product").price(new BigDecimal("15.99"))
-                .stock(10).imageUrl("https://cloudinary.com/img.jpg").build();
+                .stock(10).category("General").imageUrl("https://cloudinary.com/img.jpg").build();
 
         when(productService.createProduct(any(ProductRequest.class), any()))
                 .thenReturn(response);
