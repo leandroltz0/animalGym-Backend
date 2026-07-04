@@ -1,6 +1,7 @@
 package com.animalgym.api.config;
 
 import com.animalgym.api.service.JwtService;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -30,7 +31,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         if (token != null && jwtService.isTokenValid(token)) {
             String email = jwtService.extractEmail(token);
-            String role = jwtService.extractRole(token);
+            String role;
+            try {
+                role = jwtService.extractRole(token);
+            } catch (JwtException e) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+            if (role == null) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
             List<SimpleGrantedAuthority> authorities = List.of(
                     new SimpleGrantedAuthority("ROLE_" + role)

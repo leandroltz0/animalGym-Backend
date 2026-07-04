@@ -20,7 +20,11 @@ public class CloudinaryService implements ImageStorageService {
     public String uploadImage(MultipartFile file) {
         try {
             Map<?, ?> uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-            return uploadResult.get("secure_url").toString();
+            Object secureUrl = uploadResult.get("secure_url");
+            if (secureUrl == null) {
+                throw new RuntimeException("Cloudinary upload failed: no secure_url in response");
+            }
+            return secureUrl.toString();
         } catch (IOException e) {
             throw new RuntimeException("Failed to upload image to Cloudinary", e);
         }
